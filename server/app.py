@@ -20,10 +20,32 @@ migrate = Migrate(app, db)
 
 db.init_app(app)
 
+api = Api(app)
+
 
 @app.route('/')
 def home():
     return ''
+
+class Campers(Resource):
+    def get(self):
+        campers = [camper.to_dict(rules=('-signups',))
+                    for camper in Camper.query.all()]
+
+        return make_response(campers, 200)
+
+api.add_resource(Campers, "/campers")
+
+class CampersByID(Resource):
+    def get(self, id):
+        camper = Camper.query.filter(Camper.id == id).one_or_none()
+
+        if camper is None:
+            return make_response({'error': 'Camper not found'}, 404)
+            
+        return make_response(camper.to_dict(), 200)
+
+api.add_resource(CampersByID, "/campers/<int:id>")
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
