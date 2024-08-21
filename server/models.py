@@ -27,7 +27,7 @@ class Activity(db.Model, SerializerMixin):
 #completely botched relationships: 
 #signups is a relationship, connect to Signup, delete activity if signup is deleted
 #backref connects to activity table
-#serialize rules
+#serialize rules REVIEW
 
     signups = db.relationship(
         "Signup", cascade='all,delete', backref="activity")
@@ -55,8 +55,8 @@ class Camper(db.Model, SerializerMixin):
     
     @validates('age')
     def validate_age(self, key, age):
-        if not 8 <= age <= 23:
-            raise ValueError('Camper must be between 8 and 18')
+        if not 8 <= age <= 18:
+            raise ValueError("Age must be 8 to 18")
         return age
     
     def __repr__(self):
@@ -68,11 +68,10 @@ class Signup(db.Model, SerializerMixin):
 
     id = db.Column(db.Integer, primary_key=True)
     time = db.Column(db.Integer)
-
+# both camper and activity are joined by the signup table
     camper_id = db.Column(db.Integer, db.ForeignKey('campers.id'))
     activity_id = db.Column(db.Integer, db.ForeignKey('activities.id'))
-    
-    serialize_rules = ("-camper.signups")
+    serialize_rules = ("-camper.signups", "-activity.signups")
 
     @validates('time')
     def validate_time(self, key, time):
